@@ -1,3 +1,13 @@
+Frontend code for this project.  
+https://github.com/enu-kuro/zku-final-project
+  
+Deployed on vercel.  
+https://zku-final-projetct-frontend.vercel.app/
+　
+___
+　　
+___
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
