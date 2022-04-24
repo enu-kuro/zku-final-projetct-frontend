@@ -113,7 +113,7 @@ export const GamePlayView = ({ opponent }: { opponent: string }) => {
       console.log("getCurrentState");
       const _currentRound = await contract?.currentRound();
       setCurrentRound(_currentRound || 1);
-      const myGuess = await contract?.getSubmittedGuess(account || "");
+      const myGuess = await contract?.getSubmittedGuess(account);
       if (myGuess) {
         setMyGuesses(
           myGuess
@@ -123,7 +123,7 @@ export const GamePlayView = ({ opponent }: { opponent: string }) => {
             )
         );
       }
-      const myHB = await contract?.getSubmittedHB(opponent || "");
+      const myHB = await contract?.getSubmittedHB(opponent);
       if (myHB) {
         setMyHBNums(
           myHB
@@ -170,7 +170,7 @@ export const GamePlayView = ({ opponent }: { opponent: string }) => {
       d: ZeroToNine
     ) => {
       const guess = [a, b, c, d] as FourNumbers;
-      if (account == player) {
+      if (account === player) {
         console.log(`onSubmitGuess`);
         if (myGuesses.length === currentRound) {
           return;

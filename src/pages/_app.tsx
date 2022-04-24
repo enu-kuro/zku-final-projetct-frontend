@@ -9,7 +9,7 @@ import { NotificationsProvider } from "@mantine/notifications";
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
   // defaultは4000?
-  // library.pollingInterval = 12000;
+  library.pollingInterval = 1000;
   return library;
 }
 

@@ -20,7 +20,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
   const { account } = useWeb3React();
   const [solution, solutionHash, salt] = retrieveSolutionInfo();
   const [isWinner, setIsWinner] = useState<boolean>();
-
+  const [isLoading, setIsLoading] = useState(false);
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [myGuesses, setMyGuesses] = useState<FourNumbers[]>([]);
   const [myHBNums, setMyHBNums] = useState<HBNum[]>([]);
@@ -46,7 +46,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
       console.log("getCurrentState");
       const _currentRound = await contract?.currentRound();
       setCurrentRound(_currentRound || 1);
-      const myGuess = await contract?.getSubmittedGuess(account || "");
+      const myGuess = await contract?.getSubmittedGuess(account);
       if (myGuess) {
         setMyGuesses(
           myGuess
@@ -56,7 +56,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
             )
         );
       }
-      const myHB = await contract?.getSubmittedHB(opponent || "");
+      const myHB = await contract?.getSubmittedHB(opponent);
       if (myHB) {
         setMyHBNums(
           myHB
@@ -89,6 +89,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
   }, [account, contract, opponent]);
 
   const revealSolution = () => {
+    setIsLoading(true);
     contract?.reveal(salt, solution[0], solution[1], solution[2], solution[3]);
   };
   const renderWinView = () => {
@@ -102,6 +103,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
           variant="outline"
           color="pink"
           onClick={revealSolution}
+          loading={isLoading}
         >
           Reveal Your Solution
         </Button>

@@ -9,10 +9,10 @@ export const SolutionInfoPanel = () => {
         <Stack>
           <Title order={3}>Your Solution:</Title>
           <Text>{`[${solution}]`}</Text>
-          <Title order={3}>Your SolutionHash:</Title>
-          <Text>{`${solutionHash}`}</Text>
           <Title order={3}>Your SolutionHashSalt:</Title>
           <Text>{`${salt}`}</Text>
+          <Title order={3}>Your SolutionHash:</Title>
+          <Text>{`${solutionHash}`}</Text>
         </Stack>
       </Paper>
     </Container>
