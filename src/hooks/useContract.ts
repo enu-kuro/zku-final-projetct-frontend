@@ -24,7 +24,7 @@ export const useContract = <T extends Contract = Contract>(
 
 import { HitAndBlow } from "typechain";
 import HitAndBlowJson from "contracts/HitAndBlow.json";
-const CONTRACT_ADDRESS = "0x7245Eefb2eD9Dc5E66ca6630568606398e9965e4";
+const CONTRACT_ADDRESS = "0x98b9f00E895095fC12EdE2Bec4c14e7Ec31c9283";
 
 export const useHbContract = () =>{
   return useContract<HitAndBlow>(
