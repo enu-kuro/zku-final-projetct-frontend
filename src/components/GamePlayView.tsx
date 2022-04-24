@@ -241,7 +241,7 @@ export const GamePlayView = ({ opponent }: { opponent: string }) => {
       .split("")
       .map((num) => Number(num)) as FourNumbers;
     console.log(guessArray);
-
+    form.setFieldValue("guess", "");
     contract?.submitGuess(...guessArray);
   };
 
