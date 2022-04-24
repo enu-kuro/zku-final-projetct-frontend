@@ -10,6 +10,7 @@ const buildPoseidon = require("circomlibjs").buildPoseidon;
 
 export const CommitSolutionHashView = () => {
   const { account } = useWeb3React();
+  const [isLoading, setIsLoading] = useState(false);
   const [isCommittedSolutionHash, setIsCommittedSolutionHash] = useState(false);
   const contract = useHbContract();
   const form = useForm({
@@ -27,6 +28,7 @@ export const CommitSolutionHashView = () => {
     const onCommitSolutionHash = async (player: string) => {
       if (account === player) {
         setIsCommittedSolutionHash(true);
+        setIsLoading(false);
         console.log(`onCommitSolutionHash`);
       }
     };
@@ -48,6 +50,7 @@ export const CommitSolutionHashView = () => {
 
     contract?.commitSolutionHash(solutionHash);
     saveSolutionInfo(solutionArray, solutionHash, salt);
+    setIsLoading(true);
   };
 
   return (
@@ -68,7 +71,12 @@ export const CommitSolutionHashView = () => {
           />
 
           <Group position="right" mt="md">
-            <Button type="submit" variant="outline" color="pink">
+            <Button
+              type="submit"
+              variant="outline"
+              color="pink"
+              loading={isLoading}
+            >
               CommitSolutionHash
             </Button>
           </Group>

@@ -7,9 +7,10 @@ export const RegisterView = () => {
   const { account } = useWeb3React();
   const contract = useHbContract();
   const [isRegistered, setIsRegistered] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const register = () => {
     contract?.register();
+    setIsLoading(true);
   };
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export const RegisterView = () => {
       console.log("onRegister");
       if (player === account) {
         setIsRegistered(true);
+        setIsLoading(false);
       }
     };
     contract?.on("Register", onRegister);
@@ -32,7 +34,12 @@ export const RegisterView = () => {
       {isRegistered ? (
         <Text size="md">Please wait...</Text>
       ) : (
-        <Button variant="outline" color="pink" onClick={register}>
+        <Button
+          variant="outline"
+          color="pink"
+          onClick={register}
+          loading={isLoading}
+        >
           Register
         </Button>
       )}
