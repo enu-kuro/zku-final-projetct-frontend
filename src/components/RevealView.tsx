@@ -35,10 +35,12 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
       } else {
         setIsWinner(false);
       }
+      console.log(`winner: ${winner}`);
     };
     getWinner();
 
     // TODO: GamePlayViewと処理共通化
+    // TODO: "!opponent"だと0x00 addressの対応できていない...
     if (!opponent || !account) {
       return;
     }
@@ -56,6 +58,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
             )
         );
       }
+
       const myHB = await contract?.getSubmittedHB(opponent);
       if (myHB) {
         setMyHBNums(
@@ -68,15 +71,17 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
       }
 
       const opponentGuess = await contract?.getSubmittedGuess(opponent);
-      const opponentHB = await contract?.getSubmittedHB(account);
-      if (opponentGuess && opponentHB) {
+      if (opponentGuess) {
         const filteredOpponentGuess = opponentGuess
           .filter((guess) => guess.submitted)
           .map(
             (guess) => [guess[0], guess[1], guess[2], guess[3]] as FourNumbers
           );
         setOpponentGuesses(filteredOpponentGuess);
+      }
 
+      const opponentHB = await contract?.getSubmittedHB(account);
+      if (opponentHB) {
         const filteredOpponentHB = opponentHB
           .filter((hb) => hb.submitted)
           .map((hb) => {
@@ -85,6 +90,7 @@ export const RevealView = ({ opponent }: { opponent: string }) => {
         setOpponentHBNums(filteredOpponentHB);
       }
     };
+
     getCurrentState();
   }, [account, contract, opponent]);
 

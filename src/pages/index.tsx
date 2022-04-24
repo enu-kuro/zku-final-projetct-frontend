@@ -82,6 +82,13 @@ const Home: NextPage = () => {
     };
     getPlayers();
 
+    const onRegister = (player: string) => {
+      if (player !== account) {
+        setOpponent(player);
+      }
+    };
+    contract?.on("Register", onRegister);
+
     const onReveal = (
       player: string,
       a: number,
@@ -103,6 +110,7 @@ const Home: NextPage = () => {
     return () => {
       contract?.off("StageChange", onStageChange);
       contract?.off("Initialize", onInitialize);
+      contract?.off("Register", onRegister);
       contract?.off("Reveal", onReveal);
     };
   }, [account, contract]);
