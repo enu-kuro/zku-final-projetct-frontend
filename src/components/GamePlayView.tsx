@@ -197,8 +197,14 @@ export const GamePlayView = ({ opponent }: { opponent: string }) => {
     ) => {
       console.log(`onSubmitHB`);
       if (account !== player) {
+        if (myHBNums.length === currentRound) {
+          return;
+        }
         setMyHBNums([...myHBNums, { hit, blow }]);
       } else {
+        if (opponentHBNums.length === currentRound) {
+          return;
+        }
         setShouldSubmitProof(false);
         setOpponentHBNums([...opponentHBNums, { hit, blow }]);
       }
