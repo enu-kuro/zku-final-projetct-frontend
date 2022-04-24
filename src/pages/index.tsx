@@ -12,6 +12,7 @@ import {
   Container,
   Space,
   LoadingOverlay,
+  Stack,
 } from "@mantine/core";
 
 import { AppHeader } from "components/AppHeader";
@@ -30,9 +31,12 @@ const ConnectWallet = () => {
   };
   return (
     <Center>
-      <Button variant="outline" color="pink" onClick={onClick}>
-        Connect Connect
-      </Button>
+      <Stack>
+        <Text>Currently only for Harmony testnet!</Text>
+        <Button variant="outline" color="pink" onClick={onClick}>
+          Connect Connect
+        </Button>
+      </Stack>
     </Center>
   );
 };
