@@ -216,6 +216,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     "OwnershipTransferred(address,address)": EventFragment;
     "Register(address)": EventFragment;
     "Reveal(address,uint8,uint8,uint8,uint8)": EventFragment;
+    "RoundChange(uint8)": EventFragment;
     "StageChange(uint8)": EventFragment;
     "SubmitGuess(address,uint8,uint8,uint8,uint8,uint8)": EventFragment;
     "SubmitHB(address,uint8,uint8,uint8)": EventFragment;
@@ -227,6 +228,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Register"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Reveal"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RoundChange"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StageChange"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SubmitGuess"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SubmitHB"): EventFragment;
@@ -255,6 +257,8 @@ export type RevealEvent = TypedEvent<
     d: number;
   }
 >;
+
+export type RoundChangeEvent = TypedEvent<[number] & { round: number }>;
 
 export type StageChangeEvent = TypedEvent<[number] & { stage: number }>;
 
@@ -819,6 +823,12 @@ export class HitAndBlow extends BaseContract {
       [string, number, number, number, number],
       { player: string; a: number; b: number; c: number; d: number }
     >;
+
+    "RoundChange(uint8)"(
+      round?: null
+    ): TypedEventFilter<[number], { round: number }>;
+
+    RoundChange(round?: null): TypedEventFilter<[number], { round: number }>;
 
     "StageChange(uint8)"(
       stage?: null
