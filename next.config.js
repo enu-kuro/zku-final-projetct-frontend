@@ -8,6 +8,9 @@ const nextConfig = {
     // config.experiments = { asyncWebAssembly: true };
     return config;
   },
+  serverRuntimeConfig: {
+    PROJECT_ROOT: __dirname,
+  },
 };
 
 module.exports = nextConfig;
