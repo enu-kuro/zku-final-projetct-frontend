@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ContractTransaction } from "ethers";
 import { FourNumbers, ProofInput, SolidityProof } from "types";
 const snarkjs = require("snarkjs");
 
@@ -88,3 +88,110 @@ export function calculateHB(guess: FourNumbers, solution: FourNumbers) {
 
   return [hit, blow];
 }
+
+export const retryIfFailed = <T extends any[]>(
+  fn: (...args: T) => Promise<ContractTransaction>,
+  repeat = 2
+) => {
+  const wrappedFunc = async (...args: T) => {
+    for (let i = 0; i < repeat; i++) {
+      const tx = await fn(...args);
+      const reciept = await tx.wait();
+      if (reciept.status !== 0) {
+        return Promise.resolve();
+      }
+      console.log("retry!!! ", reciept.status);
+    }
+    return Promise.reject("error");
+  };
+  return wrappedFunc;
+};
+
+// https://gist.github.com/justinfay/f30d53f8b85a274aee57
+function permutations(array: number[], r: number) {
+  // Algorythm copied from Python `itertools.permutations`.
+  var n = array.length;
+  if (r === undefined) {
+    r = n;
+  }
+  if (r > n) {
+    return;
+  }
+  var indices = [];
+  for (var i = 0; i < n; i++) {
+    indices.push(i);
+  }
+  var cycles = [];
+  for (var i = n; i > n - r; i--) {
+    cycles.push(i);
+  }
+  var results = [];
+  var res = [];
+  for (var k = 0; k < r; k++) {
+    res.push(array[indices[k]]);
+  }
+  results.push(res);
+
+  var broken = false;
+  while (n > 0) {
+    for (var i = r - 1; i >= 0; i--) {
+      cycles[i]--;
+      if (cycles[i] === 0) {
+        indices = indices
+          .slice(0, i)
+          .concat(indices.slice(i + 1).concat(indices.slice(i, i + 1)));
+        cycles[i] = n - i;
+        broken = false;
+      } else {
+        var j = cycles[i];
+        var x = indices[i];
+        indices[i] = indices[n - j];
+        indices[n - j] = x;
+        var res = [];
+        for (var k = 0; k < r; k++) {
+          res.push(array[indices[k]]);
+        }
+        results.push(res);
+        broken = true;
+        break;
+      }
+    }
+    if (broken === false) {
+      break;
+    }
+  }
+  return results;
+}
+
+export const initCandidates = () => {
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  return permutations(numbers, 4) as FourNumbers[];
+};
+
+export const filterCandidates = (
+  candidates: FourNumbers[],
+  guess: FourNumbers,
+  hit: number,
+  blow: number
+) => {
+  if (hit === 0 && blow === 0) {
+    return candidates;
+  }
+  return candidates.filter((digits) => {
+    const unhit = digits.filter((num, i) => {
+      return num !== guess[i];
+    });
+    if (
+      unhit.length === 4 - hit &&
+      unhit.filter((num) => guess.includes(num)).length === blow
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+};
+
+export const randomSample = (items: FourNumbers[]) => {
+  return items[Math.floor(Math.random() * items.length)];
+};
