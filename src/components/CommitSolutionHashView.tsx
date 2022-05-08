@@ -58,8 +58,12 @@ export const CommitSolutionHashView = () => {
 
   const commitSolutionHash = async () => {
     if (canSubmit) {
+      saveSolutionInfo(
+        [...solution].map((s) => Number(s)) as FourNumbers,
+        solutionHash,
+        salt
+      );
       setIsLoading(true);
-      // TODO: transaction errorはこれだとcatchされていない？
       const tx = await contract
         ?.commitSolutionHash(solutionHash)
         .catch((err) => {
@@ -71,11 +75,6 @@ export const CommitSolutionHashView = () => {
         setIsLoading(false);
         toast.error("Error!");
       });
-      saveSolutionInfo(
-        [...solution].map((s) => Number(s)) as FourNumbers,
-        solutionHash,
-        salt
-      );
     }
   };
 
@@ -101,6 +100,7 @@ export const CommitSolutionHashView = () => {
   if (isCommittedSolutionHash) {
     return (
       <div className="flex flex-col items-center mt-40">
+        <div className="text-xl">Opponent is committing solution hash...</div>
         <div className="text-xl mt-2">Wait a minute.</div>
       </div>
     );

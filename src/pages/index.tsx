@@ -26,6 +26,12 @@ const Home: NextPage = () => {
         <h1 className="text-5xl font-bold mb-4">Hit And Blow onChain</h1>
         <div className="text-2xl mb-12">Full onchain PvP game</div>
         <MetaMaskButton className="btn" loading={isLoading} onClick={onClick} />
+
+        <p>
+          <strong>
+            <small>Harmony Testnet Only</small>
+          </strong>
+        </p>
       </div>
     </>
   );

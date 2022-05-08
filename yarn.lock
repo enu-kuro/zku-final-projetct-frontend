@@ -2458,6 +2458,11 @@ react-pin-field@^2.0.0-beta.3:
   resolved "https://registry.yarnpkg.com/react-pin-field/-/react-pin-field-2.0.0-beta.3.tgz#7d2767169e86e3da10feb7f176adfd13ae6ba150"
   integrity sha512-fzOOaqG9ymUnxPYtL6O80Kix1+HhH15ghcOAfTa708vbtEtHBGHXIJ4jS0BCgCaMSlDgPYrifeW235TdjZUk/A==
 
+react-rewards@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-rewards/-/react-rewards-2.0.3.tgz#685aee98654ab4f060e297849f39cf0a16cec042"
+  integrity sha512-qww5Jtk2HmCjR9wc7+0c2iP8oCQzENZn8pnoJGi0S6o+6dAD25+ZoagLSWdoBLGVwxfP5kFBjv3VZ6L8fPk6lg==
+
 react@^18.1.0:
   version "18.1.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.1.0.tgz#6f8620382decb17fdc5cc223a115e2adbf104890"

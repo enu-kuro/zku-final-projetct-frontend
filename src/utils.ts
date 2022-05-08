@@ -17,11 +17,7 @@ export enum Stage {
   Playing,
   Reveal,
 }
-export enum GameResult {
-  Win,
-  Lose,
-  Draw,
-}
+
 export const saveSolutionInfo = (
   solutionArray: FourNumbers,
   solutionHash: BigNumber,
@@ -34,7 +30,7 @@ export const saveSolutionInfo = (
   console.log("saveSolutionInfo");
 };
 
-export const retrieveSolutionInfo = () => {
+export const retrieveSolutionInfo = (): [FourNumbers, BigNumber, BigNumber] => {
   const solutionArrayStr = localStorage.getItem(solutionInfoKeys[0]);
   const solutionHashStr = localStorage.getItem(solutionInfoKeys[1]);
   const saltStr = localStorage.getItem(solutionInfoKeys[2]);
@@ -48,6 +44,13 @@ export const retrieveSolutionInfo = () => {
   } else {
     throw new Error("SolutionInfo not found");
   }
+};
+
+export const removeSolutionInfo = () => {
+  console.log("removeSolutionInfo");
+  localStorage.removeItem(solutionInfoKeys[0]);
+  localStorage.removeItem(solutionInfoKeys[1]);
+  localStorage.removeItem(solutionInfoKeys[2]);
 };
 
 // @ts-ignore

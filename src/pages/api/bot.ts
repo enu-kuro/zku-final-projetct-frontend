@@ -199,16 +199,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // if (req.method !== "POST") {
-  //   return res.status(200).json({});
-  // }
+  if (req.method !== "POST") {
+    return res.status(200).json({});
+  }
   const players = await contract.getplayers();
   if (players.includes(PLAYER_ADDRESS)) {
     return res.status(200).json({ result: "registered" });
   } else if (
-    players.filter((address) => address === ZERO_ADDRESS).length === 0
+    players.filter((address) => address === ZERO_ADDRESS).length !== 1
   ) {
-    return res.status(200).json({ result: "busy" });
+    return res.status(200).json({ result: "player should register first" });
   }
 
   if (contract.listenerCount("Initialize") === 0) {
