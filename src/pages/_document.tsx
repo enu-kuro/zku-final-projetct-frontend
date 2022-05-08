@@ -1,14 +1,12 @@
-import { createGetInitialProps } from "@mantine/next";
-import Document, { Head, Html, Main, NextScript } from "next/document";
+import NextDocument, { Html, Head, Main, NextScript } from "next/document";
 
-const getInitialProps = createGetInitialProps();
+type Props = {};
 
-export default class _Document extends Document {
-  static getInitialProps = getInitialProps;
-
+class Document extends NextDocument<Props> {
   render() {
     return (
-      <Html>
+      // https://daisyui.com/docs/themes/
+      <Html data-theme="lemonade">
         <Head />
         <body>
           <Main />
@@ -18,3 +16,5 @@ export default class _Document extends Document {
     );
   }
 }
+
+export default Document;

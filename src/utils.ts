@@ -1,9 +1,27 @@
-import { BigNumber, ContractTransaction } from "ethers";
+import { BigNumber, ContractTransaction, ethers } from "ethers";
+import { ErrorCode } from "@ethersproject/logger";
 import { FourNumbers, ProofInput, SolidityProof } from "types";
 const snarkjs = require("snarkjs");
 
+export const CONTRACT_ADDRESS = "0xF56aDfC0322B195611a39773CaaCa6dB1A51F9D3";
+
+export const ZERO_ADDRESS = ethers.constants.AddressZero; //"0x0000000000000000000000000000000000000000";
+export const HARMONY_TESTNET_CHAIN_ID = 1666700000;
+export const HARMONY_TESTNET_RPC_URL = "https://api.s0.b.hmny.io";
 const solutionInfoKeys = ["solutionArray", "solutionHash", "salt"];
 
+export enum Stage {
+  None = -1,
+  Register,
+  CommitSolutionHash,
+  Playing,
+  Reveal,
+}
+export enum GameResult {
+  Win,
+  Lose,
+  Draw,
+}
 export const saveSolutionInfo = (
   solutionArray: FourNumbers,
   solutionHash: BigNumber,
@@ -96,11 +114,24 @@ export const retryIfFailed = <T extends any[]>(
   const wrappedFunc = async (...args: T) => {
     for (let i = 0; i < repeat; i++) {
       const tx = await fn(...args);
-      const reciept = await tx.wait();
-      if (reciept.status !== 0) {
+      // status:0(transaction error)の場合はerrorを返すのでrecieptは返らない
+      const reciept = await tx.wait().catch((err) => {
+        console.log(err);
+        if (err.code === ErrorCode.CALL_EXCEPTION) {
+          // CALL_EXCEPTIONの場合はretryする(原因不明だがたまに発生する)
+          return Promise.resolve();
+        }
+        if (err.code === ErrorCode.UNPREDICTABLE_GAS_LIMIT) {
+          // TODO: manualy set gas limit?
+          console.log(ErrorCode);
+          return Promise.resolve();
+        }
+        return Promise.reject(err);
+      });
+      if (reciept) {
         return Promise.resolve();
       }
-      console.log("retry!!! ", reciept.status);
+      console.log("retry!!!");
     }
     return Promise.reject("error");
   };

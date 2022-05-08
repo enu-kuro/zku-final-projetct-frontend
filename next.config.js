@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // StrictMode render twice... https://github.com/vercel/next.js/issues/35822
+  reactStrictMode: false,
   webpack: function (config, options) {
     if (!options.isServer) {
       config.resolve.fallback.fs = false;
     }
-    // config.experiments = { asyncWebAssembly: true };
     return config;
   },
   serverRuntimeConfig: {

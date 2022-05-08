@@ -1,41 +1,63 @@
-import { Text, Title, Container, Group, Paper } from "@mantine/core";
 import { FourNumbers, HBNum } from "types";
-
+import { Button } from "./Button";
 export const SubmissionHistoryView = ({
-  myGuesses,
-  myHBNums,
-  opponentGuesses,
-  opponentHBNums,
+  guesses,
+  hbNums,
+  isSubmitting = false,
+  submitProofCallback,
 }: {
-  myGuesses: FourNumbers[];
-  myHBNums: HBNum[];
-  opponentGuesses: FourNumbers[];
-  opponentHBNums: HBNum[];
+  guesses: FourNumbers[];
+  hbNums: HBNum[];
+  isSubmitting?: boolean;
+  submitProofCallback?: () => {};
 }) => {
-  const historyView = (
-    title: string,
-    guesses: FourNumbers[],
-    hbNums: HBNum[]
-  ) => {
+  const tableRow = (idx: number, guess: FourNumbers, hbNum: HBNum) => {
+    const isEmpty = hbNum.hit === undefined;
     return (
-      <Container>
-        <Paper shadow="lg" p="lg" withBorder>
-          <Title order={3}>{title}</Title>
-          {guesses.map((guess, i) => {
-            let hbNum = "";
-            if (hbNums.length > i) {
-              hbNum = `(Hit: ${hbNums[i].hit}, Blow: ${hbNums[i].blow})`;
-            }
-            return <Text key={i}>{`Round ${i + 1}: [${guess}] ${hbNum}`}</Text>;
-          })}
-        </Paper>
-      </Container>
+      <tr key={idx}>
+        <td className="text-center px-0 py-2 text-2xl ">{guess.join(" ")}</td>
+        {isEmpty && submitProofCallback ? (
+          <td colSpan={2} className="text-center align-middle p-2">
+            <Button
+              className={`btn btn-active btn-accent btn-sm -mx-2 ${
+                !isSubmitting && "animate-bounce"
+              }`}
+              loading={isSubmitting}
+              onClick={submitProofCallback}
+            >
+              Proof
+            </Button>
+          </td>
+        ) : (
+          <>
+            <td className="text-center  px-0 py-2 text-2xl">
+              {isEmpty ? "?" : hbNum.hit}
+            </td>
+            <td className="text-center  px-0 py-2 text-2xl">
+              {isEmpty ? "?" : hbNum.blow}
+            </td>
+          </>
+        )}
+      </tr>
     );
   };
   return (
-    <Group>
-      {historyView("Your Guess", myGuesses, myHBNums)}
-      {historyView("Opponent Guess", opponentGuesses, opponentHBNums)}
-    </Group>
+    <div className="m-3">
+      <table className="table w-full mt-0">
+        <thead>
+          <tr>
+            <th className="text-center px-0 py-1 w-6/12">Guess</th>
+            <th className="text-center px-0 py-1 w-3/12">Hit</th>
+            <th className="text-center px-0 py-1 w-3/12">Blow</th>
+          </tr>
+        </thead>
+        <tbody>
+          {guesses.map((guess, i) => {
+            const hbNum = hbNums[i] || {};
+            return tableRow(i, guess, hbNum);
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 };

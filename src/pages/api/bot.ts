@@ -5,18 +5,19 @@ import HitAndBlowJson from "contracts/HitAndBlow.json";
 import { FourNumbers, ProofInput, ZeroToNine } from "types";
 import {
   calculateHB,
+  CONTRACT_ADDRESS,
   filterCandidates,
   generateProof,
   initCandidates,
   randomSample,
   retryIfFailed,
+  ZERO_ADDRESS,
 } from "utils";
 const buildPoseidon = require("circomlibjs").buildPoseidon;
 
 let poseidon: any;
 const defaultCandidates = initCandidates();
 
-const CONTRACT_ADDRESS = "0x43b9AAF34367630360ffdbe48edB855f123b14f8";
 const PLAYER_ADDRESS = "0x951444F56EF94FeC42e8cDBeDef1A4Dc1D1ea63B";
 
 class Solution {
@@ -26,6 +27,7 @@ class Solution {
 
   constructor() {
     this.numbers = randomSample(defaultCandidates);
+    console.log("Solution: ", this.numbers);
     this.salt = ethers.BigNumber.from(ethers.utils.randomBytes(32));
     this.hash = ethers.BigNumber.from(
       poseidon.F.toObject(poseidon([this.salt, ...this.numbers]))
@@ -44,13 +46,19 @@ class Player {
   }
 
   updateCandidates(guess: FourNumbers, hit: number, blow: number) {
+    // TODO: filterCandidates doesn't work properly...
     this.candidates = filterCandidates(this.candidates, guess, hit, blow);
     console.log("updateCandidates: ", this.candidates.length);
+    if (this.candidates.length === 0) {
+      // This shouldn't happen... but there seems to be a bug...
+      this.candidates = defaultCandidates;
+    }
   }
 
   guess() {
     const guess = randomSample(this.candidates);
     this.lastGuess = guess;
+    // return [1, 2, 3, 4] as FourNumbers;
     return guess;
   }
 }
@@ -67,11 +75,10 @@ const contract = new ethers.Contract(
   account
 ) as HitAndBlow;
 
-const onInitialize = () => {
-  console.log("onInitialize");
-};
-
 const submitGuess = async (guess: FourNumbers) => {
+  console.log(guess);
+  const gasLimit = await contract.estimateGas.submitGuess(...guess);
+  console.log("gasLimit: ", gasLimit.toString());
   await retryIfFailed(contract.submitGuess)(...guess).catch((err) => {
     console.log(err);
     throw Error(err);
@@ -127,6 +134,8 @@ const commitSolutionHash = async () => {
   console.log("commitSolutionHash");
   const solution = player.solution;
   const solutionHash = solution.hash;
+  const gasLimit = await contract.estimateGas.commitSolutionHash(solutionHash);
+  console.log("gasLimit: ", gasLimit.toString());
   await retryIfFailed(contract.commitSolutionHash)(solutionHash).catch(
     (err) => {
       console.log(err);
@@ -136,10 +145,11 @@ const commitSolutionHash = async () => {
 };
 
 const revealSolution = async () => {
-  const gasLimit = await contract.estimateGas.winner();
-  const winner = await contract.winner({
-    gasLimit: gasLimit.toString(),
-  });
+  // const gasLimit = await contract.estimateGas.winner();
+  // const winner = await contract.winner({
+  //   gasLimit: gasLimit.toString(),
+  // });
+  const winner = await contract.winner();
   if (PLAYER_ADDRESS === winner) {
     const solution = player.solution;
     await retryIfFailed(contract.reveal)(
@@ -174,19 +184,35 @@ const onSubmitHB = async (
   hit: number,
   blow: number
 ) => {
+  console.log("onSubmitHB");
   if (address !== PLAYER_ADDRESS) {
     player.updateCandidates(player.lastGuess!, hit, blow);
   }
 };
 
-// @TODO: transaction failした場合の処理は？
+const onInitialize = () => {
+  contract.removeAllListeners();
+  console.log("onInitialize");
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // if (req.method !== "POST") {
+  //   return res.status(200).json({});
+  // }
+  const players = await contract.getplayers();
+  if (players.includes(PLAYER_ADDRESS)) {
+    return res.status(200).json({ result: "registered" });
+  } else if (
+    players.filter((address) => address === ZERO_ADDRESS).length === 0
+  ) {
+    return res.status(200).json({ result: "busy" });
+  }
+
   if (contract.listenerCount("Initialize") === 0) {
     contract.on("Initialize", onInitialize);
-    // contract.on("Register", onRegister);
     contract.on("StageChange", onStageChange);
     contract.on("RoundChange", onRoundChange);
     contract.on("SubmitGuess", onSubmitGuess);

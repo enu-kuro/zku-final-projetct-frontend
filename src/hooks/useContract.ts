@@ -1,31 +1,52 @@
-import { Contract } from "@ethersproject/contracts";
-import { useWeb3React } from "@web3-react/core";
+import { Contract, ContractInterface } from "@ethersproject/contracts";
 import { useMemo } from "react";
+import { AddressZero } from "@ethersproject/constants";
+import { isAddress } from "ethers/lib/utils";
+import { HitAndBlow } from "typechain";
+import HbContract from "contracts/HitAndBlow.json";
+import { hooks as metaMaskHooks } from "connectors/metaMask";
+const { useChainId, useAccount, useProvider } = metaMaskHooks;
+import { CONTRACT_ADDRESS, HARMONY_TESTNET_CHAIN_ID } from "utils";
 
-export const useContract = <T extends Contract = Contract>(
+export const useContract = <T extends Contract>(
   address: string,
-  ABI: any
+  ABI: ContractInterface
 ): T | null => {
-  const { library, account, chainId } = useWeb3React();
-
+  // const { provider, account, chainId } = useWeb3React();
+  const provider = useProvider();
+  const account = useAccount();
+  const chainId = useChainId();
   return useMemo(() => {
-    if (!address || !ABI || !library || !chainId) {
+    if (!address || !ABI || !chainId || !provider) {
       return null;
     }
-
+    if (chainId !== HARMONY_TESTNET_CHAIN_ID) {
+      return null;
+    }
+    if (!isAddress(address) || address === AddressZero) {
+      throw Error(`Invalid 'address' parameter '${address}'.`);
+    }
     try {
-      return new Contract(address, ABI, library.getSigner(account));
+      return new Contract(address, ABI, provider.getSigner(account));
     } catch (error) {
       console.error("Failed To Get Contract", error);
       return null;
     }
-  }, [address, ABI, library, chainId, account]) as T;
+  }, [address, ABI, chainId, provider, account]) as T;
 };
 
-import { HitAndBlow } from "typechain";
-import HitAndBlowJson from "contracts/HitAndBlow.json";
-const CONTRACT_ADDRESS = "0x43b9AAF34367630360ffdbe48edB855f123b14f8";
-
 export const useHbContract = () => {
-  return useContract<HitAndBlow>(CONTRACT_ADDRESS, HitAndBlowJson.abi);
+  return useContract<HitAndBlow>(CONTRACT_ADDRESS, HbContract.abi);
+};
+
+// It seems MetaMask Provider is't stable about event listening...
+import { hooks as urlHooks, url } from "connectors/url";
+export const useHbContractWithUrl = () => {
+  const provider = urlHooks.useProvider();
+  return useMemo(() => {
+    if (!provider) {
+      return null;
+    }
+    return new Contract(CONTRACT_ADDRESS, HbContract.abi, provider);
+  }, [provider]) as HitAndBlow;
 };

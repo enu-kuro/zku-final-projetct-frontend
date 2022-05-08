@@ -29,6 +29,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     "getplayers()": FunctionFragment;
     "hasher()": FunctionFragment;
     "initialize()": FunctionFragment;
+    "lastActionTimestamp()": FunctionFragment;
     "owner()": FunctionFragment;
     "players(uint256)": FunctionFragment;
     "register()": FunctionFragment;
@@ -69,6 +70,10 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "hasher", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastActionTimestamp",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -170,6 +175,10 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "getplayers", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasher", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "lastActionTimestamp",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
@@ -211,7 +220,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
 
   events: {
     "CommitSolutionHash(address,uint256)": EventFragment;
-    "GameFinish()": EventFragment;
+    "GameFinish(address)": EventFragment;
     "Initialize()": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Register(address)": EventFragment;
@@ -238,7 +247,7 @@ export type CommitSolutionHashEvent = TypedEvent<
   [string, BigNumber] & { player: string; solutionHash: BigNumber }
 >;
 
-export type GameFinishEvent = TypedEvent<[] & {}>;
+export type GameFinishEvent = TypedEvent<[string] & { winner: string }>;
 
 export type InitializeEvent = TypedEvent<[] & {}>;
 
@@ -370,6 +379,8 @@ export class HitAndBlow extends BaseContract {
     initialize(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    lastActionTimestamp(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -516,6 +527,8 @@ export class HitAndBlow extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   players(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -656,6 +669,8 @@ export class HitAndBlow extends BaseContract {
 
     initialize(overrides?: CallOverrides): Promise<void>;
 
+    lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     players(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -770,9 +785,13 @@ export class HitAndBlow extends BaseContract {
       { player: string; solutionHash: BigNumber }
     >;
 
-    "GameFinish()"(): TypedEventFilter<[], {}>;
+    "GameFinish(address)"(
+      winner?: string | null
+    ): TypedEventFilter<[string], { winner: string }>;
 
-    GameFinish(): TypedEventFilter<[], {}>;
+    GameFinish(
+      winner?: string | null
+    ): TypedEventFilter<[string], { winner: string }>;
 
     "Initialize()"(): TypedEventFilter<[], {}>;
 
@@ -923,6 +942,8 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     players(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
@@ -1036,6 +1057,10 @@ export class HitAndBlow extends BaseContract {
 
     initialize(
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    lastActionTimestamp(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;

@@ -1,16 +1,53 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.pin-field {
+  background-color: rgb(248, 249, 250);
+  border: 1px solid rgb(204, 204, 204);
+  border-radius: 0.3rem;
+  font-size: 2rem;
+  margin: 0.25rem;
+  height: 3.5rem;
+  outline: none;
+  text-align: center;
+  transition-duration: 250ms;
+  transition-property: background, color, border, box-shadow, transform;
+  width: 3rem;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.pin-field:focus {
+  border-color: rgb(0, 123, 255);
+  outline: none;
+  transform: scale(1.05);
 }
 
-* {
-  box-sizing: border-box;
+.pin-field:invalid {
+  animation: shake 3 linear 75ms;
+  border-color: rgb(220, 53, 69);
+  box-shadow: 0 0 0.25rem rgba(220, 53, 69, 0.5);
+}
+
+swd-pin-field {
+  display: flex;
+  justify-content: center;
+}
+
+swd-pin-field[completed] .pin-field {
+  border-color: rgb(40, 167, 69);
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.pin-field:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@keyframes shake {
+  from {
+    transform: scale(1.05) translateY(-5%);
+  }
+  to {
+    transform: scale(1.05) translateY(5%);
+  }
 }
