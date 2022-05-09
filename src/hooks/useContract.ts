@@ -4,23 +4,24 @@ import { AddressZero } from "@ethersproject/constants";
 import { isAddress } from "ethers/lib/utils";
 import { HitAndBlow } from "typechain";
 import HbContract from "contracts/HitAndBlow.json";
+import { useChains } from "./useChains";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
 const { useChainId, useAccount, useProvider } = metaMaskHooks;
-import { CONTRACT_ADDRESS, HARMONY_TESTNET_CHAIN_ID } from "utils";
 
 export const useContract = <T extends Contract>(
   address: string,
   ABI: ContractInterface
 ): T | null => {
-  // const { provider, account, chainId } = useWeb3React();
   const provider = useProvider();
   const account = useAccount();
   const chainId = useChainId();
+  const { selectedChain } = useChains();
+
   return useMemo(() => {
     if (!address || !ABI || !chainId || !provider) {
       return null;
     }
-    if (chainId !== HARMONY_TESTNET_CHAIN_ID) {
+    if (chainId !== selectedChain?.id) {
       return null;
     }
     if (!isAddress(address) || address === AddressZero) {
@@ -32,21 +33,35 @@ export const useContract = <T extends Contract>(
       console.error("Failed To Get Contract", error);
       return null;
     }
-  }, [address, ABI, chainId, provider, account]) as T;
+  }, [address, ABI, chainId, provider, selectedChain?.id, account]) as T;
 };
 
 export const useHbContract = () => {
-  return useContract<HitAndBlow>(CONTRACT_ADDRESS, HbContract.abi);
+  const { selectedChain } = useChains();
+  return useContract<HitAndBlow>(
+    selectedChain?.contractAddress || "",
+    HbContract.abi
+  );
 };
 
+export const useHbContractWithUrl = useHbContract;
+/*
 // It seems MetaMask Provider is't stable about event listening...
-import { hooks as urlHooks, url } from "connectors/url";
+import { hooks as urlHooks } from "connectors/url";
+
 export const useHbContractWithUrl = () => {
   const provider = urlHooks.useProvider();
+  const { selectedChain } = useChains();
   return useMemo(() => {
     if (!provider) {
       return null;
     }
-    return new Contract(CONTRACT_ADDRESS, HbContract.abi, provider);
-  }, [provider]) as HitAndBlow;
+    console.log(selectedChain?.contractAddress);
+    return new Contract(
+      selectedChain?.contractAddress || "",
+      HbContract.abi,
+      provider
+    );
+  }, [provider, selectedChain?.contractAddress]) as HitAndBlow;
 };
+*/

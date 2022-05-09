@@ -1,6 +1,6 @@
+import { useChains } from "./useChains";
 import { useEffect, useRef, useState } from "react";
 import { hooks as metaMaskHooks, metaMask } from "connectors/metaMask";
-import { HARMONY_TESTNET_CHAIN_ID } from "utils";
 
 const { useChainId, useAccount, useError, useIsActive, useIsActivating } =
   metaMaskHooks;
@@ -20,14 +20,15 @@ export default function useAuth() {
   const isActivating = useIsActivating();
   const prevIsActivating = usePrevious(isActivating);
   const error = useError();
+  const { selectedChain } = useChains();
 
   useEffect(() => {
-    if (chainId && chainId !== HARMONY_TESTNET_CHAIN_ID) {
-      console.log("wrong chain: ", chainId);
+    if (chainId && selectedChain && chainId !== selectedChain?.id) {
+      console.log("wrong chain: ", chainId, selectedChain?.id);
       console.log("deactivate");
       metaMask.deactivate();
     }
-  }, [chainId]);
+  }, [chainId, selectedChain, selectedChain?.id]);
 
   useEffect(() => {
     if (isActive) {
@@ -40,5 +41,5 @@ export default function useAuth() {
     }
   }, [chainId, isActivating, isActive, prevIsActivating]);
 
-  return { user, isConnecting, isActive, error };
+  return { user, isConnecting, isActive, error, chainId };
 }

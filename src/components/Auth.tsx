@@ -1,27 +1,42 @@
 import { metaMask } from "connectors/metaMask";
 import { url } from "connectors/url";
 import useAuth from "hooks/useAuth";
+import { useChains } from "hooks/useChains";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect } from "react";
 
 export const Auth: React.FC<{ children?: ReactNode }> = ({ children }) => {
-  const { user, isActive, isConnecting } = useAuth();
+  const { user, isActive, isConnecting, chainId } = useAuth();
+  const { selectedChain, isMainnet } = useChains();
   const router = useRouter();
 
   useEffect(() => {
+    // if unconnected, redirect to top
     if (!user && !isConnecting && router.pathname !== "/") {
-      // if unconnected, redirect to top
+      let queryString = "";
+      if (isMainnet) {
+        queryString = "?mainnet";
+      }
+      console.log(user, isConnecting);
       console.log("redirect to /");
-      router.push("/", undefined, { shallow: true });
+      router.push(`/${queryString}`, undefined, { shallow: true });
     }
-  }, [user, isConnecting, router]);
+  }, [user, isConnecting, router, isMainnet]);
 
   useEffect(() => {
-    if (isActive && router.pathname !== "/game") {
+    if (
+      isActive &&
+      router.pathname !== "/game" &&
+      selectedChain?.id === chainId
+    ) {
+      let queryString = "";
+      if (isMainnet) {
+        queryString = "?mainnet";
+      }
       console.log("redirect to /game");
-      router.push("/game", undefined, { shallow: true });
+      router.push(`/game${queryString}`, undefined, { shallow: true });
     }
-  }, [isActive, router]);
+  }, [chainId, isActive, isMainnet, router, selectedChain?.id]);
 
   useEffect(() => {
     // connectEagerlyすると一時的にproviderのstateがresetされるようなのでtopで一度だけ実行させる

@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BigNumber, ContractTransaction, ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { HitAndBlow } from "typechain";
 import HitAndBlowJson from "contracts/HitAndBlow.json";
 import { FourNumbers, ProofInput, ZeroToNine } from "types";
 import {
+  AvailableChains,
   calculateHB,
-  CONTRACT_ADDRESS,
   filterCandidates,
   generateProof,
   initCandidates,
@@ -18,7 +18,7 @@ const buildPoseidon = require("circomlibjs").buildPoseidon;
 let poseidon: any;
 const defaultCandidates = initCandidates();
 
-const PLAYER_ADDRESS = "0x951444F56EF94FeC42e8cDBeDef1A4Dc1D1ea63B";
+const BOT_PLAYER_ADDRESS = "0x951444F56EF94FeC42e8cDBeDef1A4Dc1D1ea63B";
 
 class Solution {
   readonly numbers: FourNumbers;
@@ -62,148 +62,173 @@ class Player {
     return guess;
   }
 }
-let player: Player;
+let bots: Bot[] = [];
+const contracts = AvailableChains.map((chain) => {
+  return new ethers.Contract(
+    chain.contractAddress,
+    HitAndBlowJson.abi,
+    new ethers.Wallet(
+      process.env.PRIVATE_KEY as string,
+      ethers.getDefaultProvider(chain.url)
+    )
+  ) as HitAndBlow;
+});
 
-const account = new ethers.Wallet(
-  process.env.PRIVATE_KEY as string,
-  ethers.getDefaultProvider("https://api.s0.b.hmny.io")
-);
+class Bot {
+  readonly contract: HitAndBlow;
+  readonly player: Player;
 
-const contract = new ethers.Contract(
-  CONTRACT_ADDRESS,
-  HitAndBlowJson.abi,
-  account
-) as HitAndBlow;
+  constructor(_contract: HitAndBlow) {
+    this.contract = _contract;
+    this.player = new Player();
 
-const submitGuess = async (guess: FourNumbers) => {
-  console.log(guess);
-  const gasLimit = await contract.estimateGas.submitGuess(...guess);
-  console.log("gasLimit: ", gasLimit.toString());
-  await retryIfFailed(contract.submitGuess)(...guess).catch((err) => {
-    console.log(err);
-    throw Error(err);
-  });
-};
-
-const submitProof = async (
-  guess: FourNumbers,
-  solution: Solution,
-  hit: number,
-  blow: number
-) => {
-  const proofInput: ProofInput = {
-    pubGuessA: guess[0],
-    pubGuessB: guess[1],
-    pubGuessC: guess[2],
-    pubGuessD: guess[3],
-    pubNumHit: hit,
-    pubNumBlow: blow,
-    pubSolnHash: solution.hash,
-    privSolnA: solution.numbers[0],
-    privSolnB: solution.numbers[1],
-    privSolnC: solution.numbers[2],
-    privSolnD: solution.numbers[3],
-    privSalt: solution.salt,
-  };
-  const proof = await generateProof(proofInput);
-  await retryIfFailed(contract.submitHbProof)(...proof).catch((err) => {
-    console.log(err);
-    throw Error(err);
-  });
-};
-
-const onSubmitGuess = async (
-  address: string,
-  currentRound: number,
-  a: ZeroToNine,
-  b: ZeroToNine,
-  c: ZeroToNine,
-  d: ZeroToNine
-) => {
-  console.log("onSubmitGuess");
-  if (address !== PLAYER_ADDRESS) {
-    const guess = [a, b, c, d] as FourNumbers;
-    const solution = player.solution;
-    const solutionNumbers = solution.numbers;
-    const [hit, blow] = calculateHB(guess, solutionNumbers);
-    await submitProof(guess, solution, hit, blow);
+    this.contract.on("Initialize", this.onInitialize);
+    this.contract.on("StageChange", this.onStageChange);
+    this.contract.on("RoundChange", this.onRoundChange);
+    this.contract.on("SubmitGuess", this.onSubmitGuess);
+    this.contract.on("SubmitHB", this.onSubmitHB);
+    console.log("Listen Events");
   }
-};
-
-const commitSolutionHash = async () => {
-  console.log("commitSolutionHash");
-  const solution = player.solution;
-  const solutionHash = solution.hash;
-  const gasLimit = await contract.estimateGas.commitSolutionHash(solutionHash);
-  console.log("gasLimit: ", gasLimit.toString());
-  await retryIfFailed(contract.commitSolutionHash)(solutionHash).catch(
-    (err) => {
-      console.log(err);
-      throw Error(err);
+  removeAllListeners() {
+    this.contract.removeAllListeners();
+  }
+  onInitialize = () => {
+    this.contract.removeAllListeners();
+    console.log("onInitialize");
+  };
+  onSubmitHB = async (
+    address: string,
+    currentRound: number,
+    hit: number,
+    blow: number
+  ) => {
+    console.log("onSubmitHB");
+    if (address !== BOT_PLAYER_ADDRESS) {
+      this.player.updateCandidates(this.player.lastGuess!, hit, blow);
     }
-  );
-};
+  };
 
-const revealSolution = async () => {
-  // const gasLimit = await contract.estimateGas.winner();
-  // const winner = await contract.winner({
-  //   gasLimit: gasLimit.toString(),
-  // });
-  const winner = await contract.winner();
-  if (PLAYER_ADDRESS === winner) {
-    const solution = player.solution;
-    await retryIfFailed(contract.reveal)(
-      solution.salt,
-      ...solution.numbers
-    ).catch((err) => {
+  onStageChange = async (stage: number) => {
+    console.log(`Stage: ${stage}`);
+    if (stage === 1) {
+      await this.commitSolutionHash();
+    } else if (stage === 2) {
+      await this.submitGuess(this.player.guess());
+    } else if (stage === 3) {
+      await this.revealSolution();
+    }
+  };
+
+  onRoundChange = async (round: number) => {
+    console.log(`Round: ${round}`);
+    await this.submitGuess(this.player.guess());
+  };
+
+  onSubmitGuess = async (
+    address: string,
+    currentRound: number,
+    a: ZeroToNine,
+    b: ZeroToNine,
+    c: ZeroToNine,
+    d: ZeroToNine
+  ) => {
+    console.log("onSubmitGuess");
+    if (address !== BOT_PLAYER_ADDRESS) {
+      const guess = [a, b, c, d] as FourNumbers;
+      const solution = this.player.solution;
+      const solutionNumbers = solution.numbers;
+      const [hit, blow] = calculateHB(guess, solutionNumbers);
+      await this.submitProof(guess, solution, hit, blow);
+    }
+  };
+
+  async register() {
+    await retryIfFailed(this.contract.register)().catch((err) => {
       console.log(err);
       throw Error(err);
     });
   }
-};
 
-const onStageChange = async (stage: number) => {
-  console.log(`Stage: ${stage}`);
-  if (stage === 1) {
-    await commitSolutionHash();
-  } else if (stage === 2) {
-    await submitGuess(player.guess());
-  } else if (stage === 3) {
-    await revealSolution();
+  async commitSolutionHash() {
+    console.log("commitSolutionHash");
+    const solution = this.player.solution;
+    const solutionHash = solution.hash;
+    await retryIfFailed(this.contract.commitSolutionHash)(solutionHash).catch(
+      (err) => {
+        console.log(err);
+        throw Error(err);
+      }
+    );
   }
-};
 
-const onRoundChange = async (round: number) => {
-  console.log(`Round: ${round}`);
-  await submitGuess(player.guess());
-};
-
-const onSubmitHB = async (
-  address: string,
-  currentRound: number,
-  hit: number,
-  blow: number
-) => {
-  console.log("onSubmitHB");
-  if (address !== PLAYER_ADDRESS) {
-    player.updateCandidates(player.lastGuess!, hit, blow);
+  async submitGuess(guess: FourNumbers) {
+    console.log(guess);
+    await retryIfFailed(this.contract.submitGuess)(...guess).catch((err) => {
+      console.log(err);
+      throw Error(err);
+    });
   }
-};
 
-const onInitialize = () => {
-  contract.removeAllListeners();
-  console.log("onInitialize");
-};
+  async submitProof(
+    guess: FourNumbers,
+    solution: Solution,
+    hit: number,
+    blow: number
+  ) {
+    const proofInput: ProofInput = {
+      pubGuessA: guess[0],
+      pubGuessB: guess[1],
+      pubGuessC: guess[2],
+      pubGuessD: guess[3],
+      pubNumHit: hit,
+      pubNumBlow: blow,
+      pubSolnHash: solution.hash,
+      privSolnA: solution.numbers[0],
+      privSolnB: solution.numbers[1],
+      privSolnC: solution.numbers[2],
+      privSolnD: solution.numbers[3],
+      privSalt: solution.salt,
+    };
+    const proof = await generateProof(proofInput);
+    await retryIfFailed(this.contract.submitHbProof)(...proof).catch((err) => {
+      console.log(err);
+      throw Error(err);
+    });
+  }
+
+  async revealSolution() {
+    const winner = await this.contract.winner();
+    if (BOT_PLAYER_ADDRESS === winner) {
+      const solution = this.player.solution;
+      await retryIfFailed(this.contract.reveal)(
+        solution.salt,
+        ...solution.numbers
+      ).catch((err) => {
+        console.log(err);
+        throw Error(err);
+      });
+    }
+  }
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method !== "POST") {
-    return res.status(200).json({});
+    return res.status(500).json({ error: "error" });
   }
+
+  const chainIdx = AvailableChains.findIndex(
+    (chain) => chain.id === req.body.chainId
+  );
+  if (chainIdx === -1) {
+    return res.status(500).json({ error: "chainId not found" });
+  }
+  const contract = contracts[chainIdx];
+
   const players = await contract.getplayers();
-  if (players.includes(PLAYER_ADDRESS)) {
+  if (players.includes(BOT_PLAYER_ADDRESS)) {
     return res.status(200).json({ result: "registered" });
   } else if (
     players.filter((address) => address === ZERO_ADDRESS).length !== 1
@@ -211,23 +236,30 @@ export default async function handler(
     return res.status(200).json({ result: "player should register first" });
   }
 
-  if (contract.listenerCount("Initialize") === 0) {
-    contract.on("Initialize", onInitialize);
-    contract.on("StageChange", onStageChange);
-    contract.on("RoundChange", onRoundChange);
-    contract.on("SubmitGuess", onSubmitGuess);
-    contract.on("SubmitHB", onSubmitHB);
-    console.log("Listen Events");
-  }
-
   if (!poseidon) {
     poseidon = await buildPoseidon();
   }
-  player = new Player();
 
-  await retryIfFailed(contract.register)().catch((err) => {
-    console.log(err);
-    throw Error(err);
-  });
+  bots[chainIdx]?.removeAllListeners();
+  delete bots[chainIdx];
+  const bot = new Bot(contract);
+  bot.register();
+  bots[chainIdx] = bot;
   res.status(200).json({ result: "ok" });
 }
+
+// TODO: memory leak?
+setInterval(() => {
+  const used = process.memoryUsage();
+  const messages = [];
+  for (let key in used) {
+    messages.push(
+      `${key}: ${
+        Math.round(
+          (used[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100
+        ) / 100
+      } MB`
+    );
+  }
+  console.log(new Date(), messages.join(", "));
+}, 1 * 60 * 1000);

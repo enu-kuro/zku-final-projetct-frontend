@@ -19,9 +19,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       >
         <Auth>
           <Component {...pageProps} />
+          <Toaster position="top-right" />
         </Auth>
       </Web3ReactProvider>
-      <Toaster position="top-right" />
     </ErrorBoundary>
   );
 }

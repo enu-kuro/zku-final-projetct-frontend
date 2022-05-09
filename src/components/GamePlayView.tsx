@@ -16,6 +16,7 @@ import { UserInfo } from "./UserInfo";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useReward } from "react-rewards";
+import { useChains } from "hooks/useChains";
 
 const WrappedReactPinField = dynamic(() => import("./WrappedReactPinField"), {
   ssr: false,
@@ -38,7 +39,7 @@ const DrawBadge = () => {
     </div>
   );
 };
-// TODO: Audience mode
+
 export const GamePlayView = ({
   stage,
   players,
@@ -54,6 +55,7 @@ export const GamePlayView = ({
     lifetime: 1000,
     startVelocity: 20,
   });
+  const { isMainnet } = useChains();
   const [solution, solutionHash, salt] = isPlayer
     ? retrieveSolutionInfo()
     : [null, null, null];
@@ -175,16 +177,16 @@ export const GamePlayView = ({
         privSolnD: solution[3],
         privSalt: salt,
       };
-      const proof = await generateProof(proofInput);
-      const tx = await contract?.submitHbProof(...proof).catch((err) => {
-        console.log(err);
-        setIsSubmittingProof(false);
-      });
-      await tx?.wait().catch((err) => {
+
+      try {
+        const proof = await generateProof(proofInput);
+        const tx = await contract?.submitHbProof(...proof);
+        await tx?.wait();
+      } catch (err) {
         console.log(err);
         setIsSubmittingProof(false);
         toast.error("Error!");
-      });
+      }
     } else {
       throw Error();
     }
@@ -278,7 +280,10 @@ export const GamePlayView = ({
       }
     };
 
-    if (contractWithJsonRpcProvider?.listenerCount("SubmitGuess") === 0) {
+    if (
+      contractWithJsonRpcProvider?.listenerCount("SubmitGuess") === 0 &&
+      !players.includes(ZERO_ADDRESS)
+    ) {
       console.log("listen!!!");
       // linsten only once
       contractWithJsonRpcProvider?.on("SubmitGuess", onSubmitGuess);
@@ -293,24 +298,31 @@ export const GamePlayView = ({
       contractWithJsonRpcProvider?.off("GameFinish", onGameFinish);
       contractWithJsonRpcProvider?.off("Reveal", onReveal);
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, players, contractWithJsonRpcProvider, leftSideIdx, myIndex]);
+  }, [
+    account,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    players[0],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    players[1],
+    contractWithJsonRpcProvider,
+    leftSideIdx,
+    myIndex,
+  ]);
 
   const submitGuess = async () => {
     const guessArray: FourNumbers = guess
       .split("")
       .map((num) => Number(num)) as FourNumbers;
     setIsSubmitting(true);
-    const tx = await contract?.submitGuess(...guessArray).catch((err) => {
-      console.log(err);
-      setIsSubmitting(false);
-    });
-    await tx?.wait().catch((err) => {
+    try {
+      const tx = await contract?.submitGuess(...guessArray);
+      await tx?.wait();
+    } catch (err) {
       console.log(err);
       setIsSubmitting(false);
       toast.error("Error!");
-    });
+    }
   };
 
   const handleOnChange = (guess: string) => {
@@ -322,17 +334,20 @@ export const GamePlayView = ({
   const handleReveal = async () => {
     if (solution) {
       setIsRevealing(true);
-      const tx = await contract
-        ?.reveal(salt, solution[0], solution[1], solution[2], solution[3])
-        .catch((err) => {
-          console.log(err);
-          setIsRevealing(false);
-        });
-      await tx?.wait().catch((err) => {
+      try {
+        const tx = await contract?.reveal(
+          salt,
+          solution[0],
+          solution[1],
+          solution[2],
+          solution[3]
+        );
+        await tx?.wait();
+      } catch (err) {
         console.log(err);
         setIsRevealing(false);
         toast.error("Error!");
-      });
+      }
     }
   };
 
@@ -365,7 +380,7 @@ export const GamePlayView = ({
         );
       } else {
         return (
-          <Link href="/">
+          <Link href={`/${isMainnet && "?mainnet"}`}>
             <a className="mt-6">Go back to Top</a>
           </Link>
         );

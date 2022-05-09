@@ -97,7 +97,11 @@ const Game: NextPage = () => {
 
   return (
     <>
-      <Header centerText="Hit And Blow onChain" />
+      <Header
+        centerText="Hit And Blow onChain"
+        isPlayer={isPlayer}
+        canChangeChain={stage === Stage.Register}
+      />
       <div className="prose container mx-auto flex flex-col">
         {renderView()}
       </div>

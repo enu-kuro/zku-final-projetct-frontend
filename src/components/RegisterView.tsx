@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
 import toast from "react-hot-toast";
 import { ProgressBar } from "./ProgressBar";
+import { useChains } from "hooks/useChains";
 
 const { useAccount } = metaMaskHooks;
 
@@ -15,7 +16,7 @@ export const RegisterView = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const interval = useRef<NodeJS.Timer | null>(null);
-
+  const { selectedChain } = useChains();
   useEffect(() => {
     const onRegister = async (player: string) => {
       console.log("onRegister");
@@ -29,7 +30,9 @@ export const RegisterView = () => {
 
         await fetch("/api/bot", {
           method: "POST",
+          body: JSON.stringify({ chainId: selectedChain?.id }),
           headers: {
+            Accept: "application/json",
             "Content-Type": "application/json",
           },
         }).catch((err) => {
@@ -37,12 +40,14 @@ export const RegisterView = () => {
         });
       }
     };
+
+    console.log("listen!");
     contractWithJsonRpcProvider?.on("Register", onRegister);
 
     return () => {
       contractWithJsonRpcProvider?.off("Register", onRegister);
     };
-  }, [account, contractWithJsonRpcProvider]);
+  }, [account, contractWithJsonRpcProvider, selectedChain?.id]);
 
   useEffect(() => {
     return () => {

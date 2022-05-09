@@ -1,11 +1,10 @@
-import Link from "next/link";
-
-export const GithubLink = () => {
+export const GithubLink = ({ className }: { className: string }) => {
   return (
     <a
       href="https://github.com/enu-kuro/zku-final-project"
       target="_blank"
       rel="noopener noreferrer"
+      className={className}
     >
       <svg
         className="w-6 h-6"

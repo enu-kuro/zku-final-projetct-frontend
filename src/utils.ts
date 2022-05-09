@@ -3,11 +3,32 @@ import { ErrorCode } from "@ethersproject/logger";
 import { FourNumbers, ProofInput, SolidityProof } from "types";
 const snarkjs = require("snarkjs");
 
-export const CONTRACT_ADDRESS = "0xF56aDfC0322B195611a39773CaaCa6dB1A51F9D3";
+export const CONTRACT_ADDRESS = "0x3c903E0b9E82bd7a4A2Ee7aDA07A46C1393f40Ff";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero; //"0x0000000000000000000000000000000000000000";
 export const HARMONY_TESTNET_CHAIN_ID = 1666700000;
 export const HARMONY_TESTNET_RPC_URL = "https://api.s0.b.hmny.io";
+type Chain = {
+  name: string;
+  id: number;
+  url: string;
+  contractAddress: string;
+};
+export const AvailableChains: Chain[] = [
+  {
+    name: "Harmony Testnet",
+    id: 1666700000,
+    url: HARMONY_TESTNET_RPC_URL,
+    contractAddress: "0x3c903E0b9E82bd7a4A2Ee7aDA07A46C1393f40Ff",
+  },
+  {
+    name: "Harmony Mainnet",
+    id: 1666600000,
+    url: "https://api.harmony.one",
+    contractAddress: "0x320Af97E6E8C580D6850890C81fd7161a3332C71",
+  },
+];
+
 const solutionInfoKeys = ["solutionArray", "solutionHash", "salt"];
 
 export enum Stage {
