@@ -37,6 +37,8 @@ export const RegisterView = () => {
             "Content-Type": "application/json",
           },
         }).catch((err) => {
+          contract?.initialize();
+          toast.success("Error!");
           console.log(err);
         });
       }
