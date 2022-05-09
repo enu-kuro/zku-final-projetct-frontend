@@ -363,7 +363,7 @@ export const GamePlayView = ({
           <>
             <div className="text-2xl mt-6">Please reveal your solution.</div>
             <Button
-              className={"btn btn-lg mt-2"}
+              className={"btn btn-lg mt-4"}
               onClick={handleReveal}
               loading={isRevealing}
             >
@@ -408,8 +408,8 @@ export const GamePlayView = ({
     }
   };
   return (
-    <div className="flex flex-col h-screen items-center mt-12">
-      <div className="flex flex-row gap-x-6">
+    <>
+      <div className="flex flex-row gap-x-6 mt-12">
         <div className="relative w-56 min-h-[24rem] border-4 rounded-3xl border-slate-200 border-solid">
           {winnerIdx === leftSideIdx && <WinBadge />}
           {isDraw && <DrawBadge />}
@@ -451,6 +451,6 @@ export const GamePlayView = ({
         </div>
       </div>
       {isPlayer && renderSubmitArea()}
-    </div>
+    </>
   );
 };

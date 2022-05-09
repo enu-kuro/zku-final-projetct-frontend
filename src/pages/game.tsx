@@ -7,6 +7,8 @@ import { GamePlayView } from "components/GamePlayView";
 import { Header } from "components/Header";
 import { Stage, ZERO_ADDRESS } from "utils";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
+import { HarmonyLogo } from "components/HarmonyLogo";
+import { useChains } from "hooks/useChains";
 
 const Game: NextPage = () => {
   const account = metaMaskHooks.useAccount()!;
@@ -14,6 +16,7 @@ const Game: NextPage = () => {
   const [stage, setStage] = useState<Stage>(Stage.None);
   const [players, setPlayers] = useState<[string, string]>();
   const isPlayer = players && players.indexOf(account) > -1;
+  const isTitleOnMiddle = stage === Stage.Register;
 
   useEffect(() => {
     const getPlayers = async () => {
@@ -94,12 +97,15 @@ const Game: NextPage = () => {
   return (
     <>
       <Header
-        centerText="Hit And Blow onChain"
+        centerText={stage === Stage.Register ? "" : "Hit And Blow onChain"}
         isPlayer={isPlayer}
         canChangeChain={stage === Stage.Register}
       />
-      <div className="prose container mx-auto flex flex-col">
+      <div className="prose container mx-auto flex flex-col items-center">
         {renderView()}
+        <div className="text-center">
+          <HarmonyLogo />
+        </div>
       </div>
     </>
   );

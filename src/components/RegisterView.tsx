@@ -71,24 +71,29 @@ export const RegisterView = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen items-center mt-40">
+    <>
+      <h1 className="text-5xl font-bold mt-40 mb-6">Hit And Blow onChain</h1>
       {isRegistered ? (
         <>
           <div className="text-xl">Searching for your opponent...</div>
           <div className="text-base mt-2">Wait a minute.</div>
           <ProgressBar
             value={progressValue}
-            className="mt-10 progress-warning w-80"
+            className="mt-8 progress-warning w-80"
           />
         </>
       ) : (
         <>
-          <div className="text-2xl mb-8">Register to play the game.</div>
-          <Button className="btn" loading={isLoading} onClick={register}>
+          <div className="text-xl mb-8">Register to play the game.</div>
+          <Button
+            className="btn btn-wide"
+            loading={isLoading}
+            onClick={register}
+          >
             Register
           </Button>
         </>
       )}
-    </div>
+    </>
   );
 };

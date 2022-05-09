@@ -1,4 +1,18 @@
-export const HarmonyLogo = ({ className }: { className?: string }) => {
+import { useChains } from "hooks/useChains";
+
+export const HarmonyLogo = () => {
+  const { selectedChain } = useChains();
+  return (
+    <p>
+      <HarmonySvg className="w-6 h-6 pr-2 inline-block" />
+      <strong>
+        <small>{selectedChain?.name}</small>
+      </strong>
+    </p>
+  );
+};
+
+const HarmonySvg = ({ className }: { className?: string }) => {
   return (
     <svg
       className={className}

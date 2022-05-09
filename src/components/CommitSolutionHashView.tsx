@@ -104,39 +104,37 @@ export const CommitSolutionHashView = () => {
   }
 
   return (
-    <div className="flex flex-col items-center mt-40">
-      <div className="container w-80 border-4 rounded-3xl border-slate-200 border-solid -mt-20 p-8">
-        <div className="mb-4 text-center">
-          <div className="text-3xl mb-2">Your Solution</div>
-          <WrappedReactPinField
-            onChange={handleOnChange}
-            className="pin-field"
-            validate="0123456789"
-            inputMode="numeric"
-            length={4}
-          />
+    <div className="container w-80 border-4 rounded-3xl border-slate-200 border-solid mt-20 p-8">
+      <div className="mb-4 text-center">
+        <div className="text-3xl mb-2">Your Solution</div>
+        <WrappedReactPinField
+          onChange={handleOnChange}
+          className="pin-field"
+          validate="0123456789"
+          inputMode="numeric"
+          length={4}
+        />
+      </div>
+      <div className="mb-5 text-center">
+        <div className="text-xl">Salt</div>
+        <div className="mb-2 text-xs break-all">{salt?.toString()}</div>
+        <Button className="btn btn-sm" onClick={changeSalt}>
+          Change Salt
+        </Button>
+      </div>
+      <div className="text-center">
+        <div className="text-xl">SolutionHash</div>
+        <div className="mb-2 text-xs break-all">
+          {solutionHash?.toString() || "_ _ _ _ _ _ _ _ _"}
         </div>
-        <div className="mb-5 text-center">
-          <div className="text-xl">Salt</div>
-          <div className="mb-2 text-xs break-all">{salt?.toString()}</div>
-          <Button className="btn btn-sm" onClick={changeSalt}>
-            Change Salt
-          </Button>
-        </div>
-        <div className="text-center">
-          <div className="text-xl">SolutionHash</div>
-          <div className="mb-2 text-xs break-all">
-            {solutionHash?.toString() || "_ _ _ _ _ _ _ _ _"}
-          </div>
-          <Button
-            className="btn btn-base"
-            onClick={commitSolutionHash}
-            disabled={!canSubmit}
-            loading={isLoading}
-          >
-            Commit SolutionHash
-          </Button>
-        </div>
+        <Button
+          className="btn btn-base"
+          onClick={commitSolutionHash}
+          disabled={!canSubmit}
+          loading={isLoading}
+        >
+          Commit SolutionHash
+        </Button>
       </div>
     </div>
   );
