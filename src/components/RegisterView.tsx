@@ -38,7 +38,7 @@ export const RegisterView = () => {
           },
         }).catch((err) => {
           contract?.initialize();
-          toast.success("Error!");
+          toast.error("Error!");
           console.log(err);
         });
       }
