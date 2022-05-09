@@ -9,6 +9,7 @@ import { Stage, ZERO_ADDRESS } from "utils";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
 import { HarmonyLogo } from "components/HarmonyLogo";
 import toast from "react-hot-toast";
+import Head from "next/head";
 
 const Game: NextPage = () => {
   const account = metaMaskHooks.useAccount()!;
@@ -95,6 +96,10 @@ const Game: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>Hit And Blow onChain</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <Header
         centerText={stage === Stage.Register ? "" : "Hit And Blow onChain"}
         isPlayer={isPlayer}

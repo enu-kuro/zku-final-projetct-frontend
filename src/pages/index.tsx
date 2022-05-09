@@ -5,6 +5,7 @@ import { Header } from "components/Header";
 import { MetaMaskButton } from "components/MetaMaskButton";
 import { useChains } from "hooks/useChains";
 import { HarmonyLogo } from "components/HarmonyLogo";
+import Head from "next/head";
 
 const Home: NextPage = () => {
   const { selectedChain } = useChains();
@@ -23,6 +24,10 @@ const Home: NextPage = () => {
   };
   return (
     <>
+      <Head>
+        <title>Hit And Blow onChain</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <Header canChangeChain={true} />
       <div className="prose container mx-auto flex flex-col items-center mt-40">
         <h1 className="text-5xl font-bold mb-4">Hit And Blow onChain</h1>
