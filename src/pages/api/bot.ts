@@ -74,14 +74,18 @@ const contracts = AvailableChains.map((chain) => {
   ) as HitAndBlow;
 });
 
+const RESET_PERIOD = 60 * 1;
 class Bot {
   readonly contract: HitAndBlow;
   readonly player: Player;
+  public lastActionTime: Date;
+  readonly timerId;
 
   constructor(_contract: HitAndBlow) {
     this.contract = _contract;
     this.player = new Player();
-
+    this.lastActionTime = new Date();
+    this.timerId = setInterval(() => this.checkActivity(), 10000);
     this.contract.on("Initialize", this.onInitialize);
     this.contract.on("StageChange", this.onStageChange);
     this.contract.on("RoundChange", this.onRoundChange);
@@ -89,11 +93,26 @@ class Bot {
     this.contract.on("SubmitHB", this.onSubmitHB);
     console.log("Listen Events");
   }
-  removeAllListeners() {
+  async checkActivity() {
+    const seconds =
+      (new Date().getTime() - this.lastActionTime.getTime()) / 1000;
+    if (seconds > RESET_PERIOD) {
+      console.log("Reset!!! ", seconds);
+      this.lastActionTime = new Date();
+      try {
+        const tx = await this.contract.initialize();
+        await tx.wait();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+  cleanup() {
     this.contract.removeAllListeners();
+    clearInterval(this.timerId);
   }
   onInitialize = () => {
-    this.contract.removeAllListeners();
+    this.cleanup();
     console.log("onInitialize");
   };
   onSubmitHB = async (
@@ -104,11 +123,13 @@ class Bot {
   ) => {
     console.log("onSubmitHB");
     if (address !== BOT_PLAYER_ADDRESS) {
+      this.lastActionTime = new Date();
       this.player.updateCandidates(this.player.lastGuess!, hit, blow);
     }
   };
 
   onStageChange = async (stage: number) => {
+    this.lastActionTime = new Date();
     console.log(`Stage: ${stage}`);
     if (stage === 1) {
       await this.commitSolutionHash();
@@ -134,6 +155,7 @@ class Bot {
   ) => {
     console.log("onSubmitGuess");
     if (address !== BOT_PLAYER_ADDRESS) {
+      this.lastActionTime = new Date();
       const guess = [a, b, c, d] as FourNumbers;
       const solution = this.player.solution;
       const solutionNumbers = solution.numbers;
@@ -240,7 +262,7 @@ export default async function handler(
     poseidon = await buildPoseidon();
   }
 
-  bots[chainIdx]?.removeAllListeners();
+  bots[chainIdx]?.cleanup();
   delete bots[chainIdx];
   const bot = new Bot(contract);
   bot.register();
@@ -248,18 +270,18 @@ export default async function handler(
   res.status(200).json({ result: "ok" });
 }
 
-// TODO: memory leak?
-setInterval(() => {
-  const used = process.memoryUsage();
-  const messages = [];
-  for (let key in used) {
-    messages.push(
-      `${key}: ${
-        Math.round(
-          (used[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100
-        ) / 100
-      } MB`
-    );
-  }
-  console.log(new Date(), messages.join(", "));
-}, 1 * 60 * 1000);
+// TODO: no memory leak?
+// setInterval(() => {
+//   const used = process.memoryUsage();
+//   const messages = [];
+//   for (let key in used) {
+//     messages.push(
+//       `${key}: ${
+//         Math.round(
+//           (used[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100
+//         ) / 100
+//       } MB`
+//     );
+//   }
+//   console.log(new Date(), messages.join(", "));
+// }, 1 * 60 * 1000);

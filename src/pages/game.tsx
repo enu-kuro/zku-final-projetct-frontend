@@ -8,7 +8,7 @@ import { Header } from "components/Header";
 import { Stage, ZERO_ADDRESS } from "utils";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
 import { HarmonyLogo } from "components/HarmonyLogo";
-import { useChains } from "hooks/useChains";
+import toast from "react-hot-toast";
 
 const Game: NextPage = () => {
   const account = metaMaskHooks.useAccount()!;
@@ -16,7 +16,6 @@ const Game: NextPage = () => {
   const [stage, setStage] = useState<Stage>(Stage.None);
   const [players, setPlayers] = useState<[string, string]>();
   const isPlayer = players && players.indexOf(account) > -1;
-  const isTitleOnMiddle = stage === Stage.Register;
 
   useEffect(() => {
     const getPlayers = async () => {
@@ -30,6 +29,7 @@ const Game: NextPage = () => {
 
     const onInitialize = () => {
       console.log("onInitialize");
+      toast.error("Reset Game!");
     };
 
     const onStageChange = (stage: number) => {
