@@ -165,30 +165,35 @@ class Bot {
   };
 
   async register() {
-    await retryIfFailed(this.contract.register)().catch((err) => {
-      console.log(err);
-      throw Error(err);
-    });
+    try {
+      await retryIfFailed(this.contract.register)();
+    } catch (err) {
+      const tx = await this.contract.initialize();
+      await tx.wait();
+      throw err;
+    }
   }
 
   async commitSolutionHash() {
     console.log("commitSolutionHash");
     const solution = this.player.solution;
     const solutionHash = solution.hash;
-    await retryIfFailed(this.contract.commitSolutionHash)(solutionHash).catch(
-      (err) => {
-        console.log(err);
-        throw Error(err);
-      }
-    );
+    try {
+      await retryIfFailed(this.contract.commitSolutionHash)(solutionHash);
+    } catch (err) {
+      await this.contract.initialize();
+      throw err;
+    }
   }
 
   async submitGuess(guess: FourNumbers) {
     console.log(guess);
-    await retryIfFailed(this.contract.submitGuess)(...guess).catch((err) => {
-      console.log(err);
-      throw Error(err);
-    });
+    try {
+      await retryIfFailed(this.contract.submitGuess)(...guess);
+    } catch (err) {
+      await this.contract.initialize();
+      throw err;
+    }
   }
 
   async submitProof(
@@ -212,23 +217,27 @@ class Bot {
       privSalt: solution.salt,
     };
     const proof = await generateProof(proofInput);
-    await retryIfFailed(this.contract.submitHbProof)(...proof).catch((err) => {
-      console.log(err);
-      throw Error(err);
-    });
+    try {
+      await retryIfFailed(this.contract.submitHbProof)(...proof);
+    } catch (err) {
+      await this.contract.initialize();
+      throw err;
+    }
   }
 
   async revealSolution() {
     const winner = await this.contract.winner();
     if (BOT_PLAYER_ADDRESS === winner) {
       const solution = this.player.solution;
-      await retryIfFailed(this.contract.reveal)(
-        solution.salt,
-        ...solution.numbers
-      ).catch((err) => {
-        console.log(err);
-        throw Error(err);
-      });
+      try {
+        await retryIfFailed(this.contract.reveal)(
+          solution.salt,
+          ...solution.numbers
+        );
+      } catch (err) {
+        await this.contract.initialize();
+        throw err;
+      }
     }
   }
 }
