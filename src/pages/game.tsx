@@ -29,7 +29,6 @@ const Game: NextPage = () => {
 
     const onInitialize = () => {
       console.log("onInitialize");
-      toast.error("Reset Game!");
     };
 
     const onStageChange = (stage: number) => {

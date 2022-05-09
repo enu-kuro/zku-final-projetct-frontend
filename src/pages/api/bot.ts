@@ -74,7 +74,7 @@ const contracts = AvailableChains.map((chain) => {
   ) as HitAndBlow;
 });
 
-const RESET_PERIOD = 60 * 1;
+const RESET_PERIOD = 60 * 10;
 class Bot {
   readonly contract: HitAndBlow;
   readonly player: Player;
