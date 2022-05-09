@@ -1,9 +1,22 @@
-Frontend code for this project.  
+## Frontend code for this project.  
 https://github.com/enu-kuro/zku-final-project
   
-Deployed on vercel.  
-https://zku-final-projetct-frontend.vercel.app/
-　
+## Demo Play (3x speed)
+https://user-images.githubusercontent.com/3497643/167441401-0c616c78-285a-4873-a162-6024f04f011b.mp4
+
+## Demo URL.  
+https://hit-and-blow-onchain.herokuapp.com  
+
+
+This project does't work on Vercel because api/bot.ts does't work on serverless environment.  
+That's why deploy on Herok.### Frontend code for this project.    
+
+This project does't work on serverless environment(Vercel etc).  
+So it's deployed on Heroku. 
+
+
+
+ 
 ___
 　　
 ___
