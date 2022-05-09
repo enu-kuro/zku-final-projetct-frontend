@@ -1,4 +1,4 @@
-import { useHbContract, useHbContractWithUrl } from "hooks/useContract";
+import { useHbContract } from "hooks/useContract";
 import { hooks as metaMaskHooks, metaMask } from "connectors/metaMask";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
@@ -10,13 +10,14 @@ const { useAccount } = metaMaskHooks;
 
 export const RegisterView = () => {
   const contract = useHbContract();
-  const contractWithJsonRpcProvider = useHbContractWithUrl();
+
   const account = useAccount();
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const interval = useRef<NodeJS.Timer | null>(null);
   const { selectedChain } = useChains();
+
   useEffect(() => {
     const onRegister = async (player: string) => {
       console.log("onRegister");
@@ -40,14 +41,12 @@ export const RegisterView = () => {
         });
       }
     };
-
-    console.log("listen!");
-    contractWithJsonRpcProvider?.on("Register", onRegister);
+    contract?.on("Register", onRegister);
 
     return () => {
-      contractWithJsonRpcProvider?.off("Register", onRegister);
+      contract?.off("Register", onRegister);
     };
-  }, [account, contractWithJsonRpcProvider, selectedChain?.id]);
+  }, [account, contract, selectedChain?.id]);
 
   useEffect(() => {
     return () => {

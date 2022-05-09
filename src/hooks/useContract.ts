@@ -43,25 +43,3 @@ export const useHbContract = () => {
     HbContract.abi
   );
 };
-
-export const useHbContractWithUrl = useHbContract;
-/*
-// It seems MetaMask Provider is't stable about event listening...
-import { hooks as urlHooks } from "connectors/url";
-
-export const useHbContractWithUrl = () => {
-  const provider = urlHooks.useProvider();
-  const { selectedChain } = useChains();
-  return useMemo(() => {
-    if (!provider) {
-      return null;
-    }
-    console.log(selectedChain?.contractAddress);
-    return new Contract(
-      selectedChain?.contractAddress || "",
-      HbContract.abi,
-      provider
-    );
-  }, [provider, selectedChain?.contractAddress]) as HitAndBlow;
-};
-*/

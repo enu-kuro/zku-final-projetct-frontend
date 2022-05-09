@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useHbContract, useHbContractWithUrl } from "hooks/useContract";
+import { useHbContract } from "hooks/useContract";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
 import { FourNumbers, HBNum, ProofInput, ZeroToNine } from "types";
 import {
@@ -60,7 +60,6 @@ export const GamePlayView = ({
     ? retrieveSolutionInfo()
     : [null, null, null];
   const contract = useHbContract();
-  const contractWithJsonRpcProvider = useHbContractWithUrl();
 
   const account = metaMaskHooks.useAccount()!; // must not undefined
   const [currentRound, setCurrentRound] = useState<number>(1);
@@ -281,22 +280,22 @@ export const GamePlayView = ({
     };
 
     if (
-      contractWithJsonRpcProvider?.listenerCount("SubmitGuess") === 0 &&
+      contract?.listenerCount("SubmitGuess") === 0 &&
       !players.includes(ZERO_ADDRESS)
     ) {
       console.log("listen!!!");
       // linsten only once
-      contractWithJsonRpcProvider?.on("SubmitGuess", onSubmitGuess);
-      contractWithJsonRpcProvider?.on("SubmitHB", onSubmitHB);
-      contractWithJsonRpcProvider?.on("GameFinish", onGameFinish);
-      contractWithJsonRpcProvider?.on("Reveal", onReveal);
+      contract?.on("SubmitGuess", onSubmitGuess);
+      contract?.on("SubmitHB", onSubmitHB);
+      contract?.on("GameFinish", onGameFinish);
+      contract?.on("Reveal", onReveal);
     }
     return () => {
       console.log("unlisten!!!");
-      contractWithJsonRpcProvider?.off("SubmitGuess", onSubmitGuess);
-      contractWithJsonRpcProvider?.off("SubmitHB", onSubmitHB);
-      contractWithJsonRpcProvider?.off("GameFinish", onGameFinish);
-      contractWithJsonRpcProvider?.off("Reveal", onReveal);
+      contract?.off("SubmitGuess", onSubmitGuess);
+      contract?.off("SubmitHB", onSubmitHB);
+      contract?.off("GameFinish", onGameFinish);
+      contract?.off("Reveal", onReveal);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -305,7 +304,7 @@ export const GamePlayView = ({
     players[0],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     players[1],
-    contractWithJsonRpcProvider,
+    contract,
     leftSideIdx,
     myIndex,
   ]);
@@ -354,7 +353,7 @@ export const GamePlayView = ({
   const renderSubmitArea = () => {
     if (isDraw) {
       return (
-        <Link href="/">
+        <Link href={`/${isMainnet ? "?mainnet" : ""}`}>
           <a className="mt-6">Go back to Top</a>
         </Link>
       );
@@ -380,7 +379,7 @@ export const GamePlayView = ({
         );
       } else {
         return (
-          <Link href={`/${isMainnet && "?mainnet"}`}>
+          <Link href={`/${isMainnet ? "?mainnet" : ""}`}>
             <a className="mt-6">Go back to Top</a>
           </Link>
         );

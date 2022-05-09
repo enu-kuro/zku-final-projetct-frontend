@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { useHbContract, useHbContractWithUrl } from "hooks/useContract";
+import { useHbContract } from "hooks/useContract";
 import { FourNumbers } from "types";
 import { BigNumber, ethers } from "ethers";
 import { saveSolutionInfo } from "utils";
@@ -29,11 +29,11 @@ export const CommitSolutionHashView = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCommittedSolutionHash, setIsCommittedSolutionHash] = useState(false);
   const contract = useHbContract();
-  const contractWithJsonRpcProvider = useHbContractWithUrl();
   const [salt, setSalt] = useState<BigNumber>();
   const [solution, setSolution] = useState("");
   const [solutionHash, setSolutionHash] = useState<BigNumber>();
   const canSubmit = solution.length === 4 && salt && solutionHash;
+
   useEffect(() => {
     setSalt(ethers.BigNumber.from(ethers.utils.randomBytes(32)));
   }, []);
@@ -47,14 +47,11 @@ export const CommitSolutionHashView = () => {
         toast.success("SolutionHash committed!");
       }
     };
-    contractWithJsonRpcProvider?.on("CommitSolutionHash", onCommitSolutionHash);
+    contract?.on("CommitSolutionHash", onCommitSolutionHash);
     return () => {
-      contractWithJsonRpcProvider?.off(
-        "CommitSolutionHash",
-        onCommitSolutionHash
-      );
+      contract?.off("CommitSolutionHash", onCommitSolutionHash);
     };
-  }, [account, contractWithJsonRpcProvider]);
+  }, [account, contract]);
 
   const commitSolutionHash = async () => {
     if (canSubmit) {

@@ -1,4 +1,4 @@
-import { useHbContract, useHbContractWithUrl } from "hooks/useContract";
+import { useHbContract } from "hooks/useContract";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { CommitSolutionHashView } from "components/CommitSolutionHashView";
@@ -11,14 +11,13 @@ import { hooks as metaMaskHooks } from "connectors/metaMask";
 const Game: NextPage = () => {
   const account = metaMaskHooks.useAccount()!;
   const contract = useHbContract();
-  const contractWithJsonRpcProvider = useHbContractWithUrl();
   const [stage, setStage] = useState<Stage>(Stage.None);
   const [players, setPlayers] = useState<[string, string]>();
   const isPlayer = players && players.indexOf(account) > -1;
 
   useEffect(() => {
     const getPlayers = async () => {
-      if (contract && contractWithJsonRpcProvider) {
+      if (contract) {
         const players = await contract.getplayers();
         setPlayers(players);
         console.log("getplayers:", players);
@@ -40,19 +39,16 @@ const Game: NextPage = () => {
         getPlayers();
       }
     };
-    if (
-      contractWithJsonRpcProvider?.listenerCount("StageChange") === 0 &&
-      contract
-    ) {
-      contractWithJsonRpcProvider.on("Initialize", onInitialize);
-      contractWithJsonRpcProvider.on("StageChange", onStageChange);
+    if (contract?.listenerCount("StageChange") === 0 && contract) {
+      contract.on("Initialize", onInitialize);
+      contract.on("StageChange", onStageChange);
     }
 
     return () => {
-      contractWithJsonRpcProvider?.off("StageChange", onStageChange);
-      contractWithJsonRpcProvider?.off("Initialize", onInitialize);
+      contract?.off("StageChange", onStageChange);
+      contract?.off("Initialize", onInitialize);
     };
-  }, [contract, contractWithJsonRpcProvider]);
+  }, [contract]);
 
   useEffect(() => {
     const getStage = async () => {
