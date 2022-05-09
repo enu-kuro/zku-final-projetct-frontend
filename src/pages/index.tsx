@@ -26,7 +26,7 @@ const Home: NextPage = () => {
       <Header canChangeChain={true} />
       <div className="prose container mx-auto flex flex-col items-center mt-40">
         <h1 className="text-5xl font-bold mb-4">Hit And Blow onChain</h1>
-        <div className="text-2xl mb-10">Full onchain PvP game</div>
+        <div className="text-2xl mb-10">Full onchain code-breaking game</div>
         <MetaMaskButton className="btn" loading={isLoading} onClick={onClick} />
         <HarmonyLogo />
       </div>
