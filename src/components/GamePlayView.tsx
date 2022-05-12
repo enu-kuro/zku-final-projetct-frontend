@@ -179,7 +179,10 @@ export const GamePlayView = ({
 
       try {
         const proof = await generateProof(proofInput);
-        const tx = await contract?.submitHbProof(...proof);
+        // if both player's submitHbProof tx is in the same block, latter's gas limit is not enough.
+        const tx = await contract?.submitHbProof(...proof, {
+          gasLimit: 450000,
+        });
         await tx?.wait();
       } catch (err) {
         console.log(err);

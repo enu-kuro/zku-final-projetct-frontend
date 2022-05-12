@@ -4,7 +4,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { isAddress } from "ethers/lib/utils";
 import { HitAndBlow } from "typechain";
 import HbContract from "contracts/HitAndBlow.json";
-import { useChains } from "./useChains";
+import { useChains } from "hooks/useChains";
 import { hooks as metaMaskHooks } from "connectors/metaMask";
 const { useChainId, useAccount, useProvider } = metaMaskHooks;
 

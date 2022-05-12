@@ -218,7 +218,9 @@ class Bot {
     };
     const proof = await generateProof(proofInput);
     try {
-      await retryIfFailed(this.contract.submitHbProof)(...proof);
+      // if both player's submitHbProof tx is in the same block, latter's gas limit is not enough.
+      const proofWithGasLimit = [...proof, { gasLimit: 450000 }] as const;
+      await retryIfFailed(this.contract.submitHbProof)(...proofWithGasLimit);
     } catch (err) {
       await this.contract.initialize();
       throw err;
