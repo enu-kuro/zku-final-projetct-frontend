@@ -77,7 +77,7 @@ export const RegisterView = () => {
       <h1 className="text-5xl font-bold mt-40 mb-6">Hit And Blow onChain</h1>
       {isRegistered ? (
         <>
-          <div className="text-xl">Searching for your opponent...</div>
+          <div className="text-xl">Activating bot player...</div>
           <div className="text-base mt-2">Wait a minute.</div>
           <ProgressBar
             value={progressValue}
