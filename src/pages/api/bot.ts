@@ -62,8 +62,8 @@ class Player {
     return guess;
   }
 }
-let bots: Bot[] = [];
-const contracts = AvailableChains.map((chain) => {
+export let bots: Bot[] = [];
+export const contracts = AvailableChains.map((chain) => {
   return new ethers.Contract(
     chain.contractAddress,
     HitAndBlowJson.abi,

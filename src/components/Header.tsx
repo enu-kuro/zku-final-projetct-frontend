@@ -6,7 +6,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useChains } from "hooks/useChains";
 import { AvailableChains } from "utils";
-import { metaMask } from "connectors/metaMask";
+import { hooks as metaMaskHooks, metaMask } from "connectors/metaMask";
+const { useAccount } = metaMaskHooks;
 
 export const Header = ({
   centerText,
@@ -18,22 +19,36 @@ export const Header = ({
   canChangeChain?: boolean;
 }) => {
   const contract = useHbContract();
+  const account = useAccount();
   const router = useRouter();
   const { isMainnet, selectedChain } = useChains();
   const [isResetting, setIsResetting] = useState(false);
 
   const initialize = async () => {
     setIsResetting(true);
-    try {
-      const tx = await contract?.initialize();
-      await tx?.wait();
+    let queryString = "";
+    if (isMainnet) {
+      queryString = "?mainnet";
+    }
 
-      let queryString = "";
-      if (isMainnet) {
-        queryString = "?mainnet";
+    try {
+      if (isPlayer) {
+        const tx = await contract?.initialize();
+        await tx?.wait();
+
+        console.log("redirect to /");
+        router.push(`/${queryString}`, undefined, { shallow: true });
+      } else {
+        await fetch("/api/reset", {
+          method: "POST",
+          body: JSON.stringify({ chainId: selectedChain?.id }),
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        router.reload();
       }
-      console.log("redirect to /");
-      router.push(`/${queryString}`, undefined, { shallow: true });
     } catch (err) {
       setIsResetting(false);
       toast.error("Error!");
@@ -88,7 +103,7 @@ export const Header = ({
           </select>
         )}
         <GithubLink className="" />
-        {isPlayer && (
+        {account && (
           <Button
             className="btn btn-error btn-xs ml-5"
             onClick={initialize}

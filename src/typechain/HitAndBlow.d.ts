@@ -29,7 +29,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     "getplayers()": FunctionFragment;
     "hasher()": FunctionFragment;
     "initialize()": FunctionFragment;
-    "lastActionTimestamp()": FunctionFragment;
+    "initializeOnlyOwner()": FunctionFragment;
     "owner()": FunctionFragment;
     "players(uint256)": FunctionFragment;
     "register()": FunctionFragment;
@@ -42,7 +42,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     "submittedGuess(uint256,address)": FunctionFragment;
     "submittedHB(uint256,address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "verifyProof(uint256[2],uint256[2][2],uint256[2],uint256[8])": FunctionFragment;
+    "verifier()": FunctionFragment;
     "winner()": FunctionFragment;
   };
 
@@ -73,7 +73,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "lastActionTimestamp",
+    functionFragment: "initializeOnlyOwner",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -135,24 +135,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "verifyProof",
-    values: [
-      [BigNumberish, BigNumberish],
-      [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-      [BigNumberish, BigNumberish],
-      [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ]
-    ]
-  ): string;
+  encodeFunctionData(functionFragment: "verifier", values?: undefined): string;
   encodeFunctionData(functionFragment: "winner", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "MAX_ROUND", data: BytesLike): Result;
@@ -176,7 +159,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "hasher", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "lastActionTimestamp",
+    functionFragment: "initializeOnlyOwner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -212,10 +195,7 @@ interface HitAndBlowInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "verifyProof",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "verifier", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "winner", data: BytesLike): Result;
 
   events: {
@@ -380,7 +360,9 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    lastActionTimestamp(overrides?: CallOverrides): Promise<[BigNumber]>;
+    initializeOnlyOwner(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -466,22 +448,7 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    verifyProof(
-      a: [BigNumberish, BigNumberish],
-      b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-      c: [BigNumberish, BigNumberish],
-      input: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      overrides?: CallOverrides
-    ): Promise<[boolean] & { r: boolean }>;
+    verifier(overrides?: CallOverrides): Promise<[string]>;
 
     winner(overrides?: CallOverrides): Promise<[string]>;
   };
@@ -527,7 +494,9 @@ export class HitAndBlow extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+  initializeOnlyOwner(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -610,22 +579,7 @@ export class HitAndBlow extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  verifyProof(
-    a: [BigNumberish, BigNumberish],
-    b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-    c: [BigNumberish, BigNumberish],
-    input: [
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish
-    ],
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  verifier(overrides?: CallOverrides): Promise<string>;
 
   winner(overrides?: CallOverrides): Promise<string>;
 
@@ -669,7 +623,7 @@ export class HitAndBlow extends BaseContract {
 
     initialize(overrides?: CallOverrides): Promise<void>;
 
-    lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+    initializeOnlyOwner(overrides?: CallOverrides): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -748,22 +702,7 @@ export class HitAndBlow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    verifyProof(
-      a: [BigNumberish, BigNumberish],
-      b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-      c: [BigNumberish, BigNumberish],
-      input: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    verifier(overrides?: CallOverrides): Promise<string>;
 
     winner(overrides?: CallOverrides): Promise<string>;
   };
@@ -942,7 +881,9 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    lastActionTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
+    initializeOnlyOwner(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1011,22 +952,7 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    verifyProof(
-      a: [BigNumberish, BigNumberish],
-      b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-      c: [BigNumberish, BigNumberish],
-      input: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    verifier(overrides?: CallOverrides): Promise<BigNumber>;
 
     winner(overrides?: CallOverrides): Promise<BigNumber>;
   };
@@ -1059,8 +985,8 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    lastActionTimestamp(
-      overrides?: CallOverrides
+    initializeOnlyOwner(
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1136,22 +1062,7 @@ export class HitAndBlow extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    verifyProof(
-      a: [BigNumberish, BigNumberish],
-      b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-      c: [BigNumberish, BigNumberish],
-      input: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    verifier(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     winner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
