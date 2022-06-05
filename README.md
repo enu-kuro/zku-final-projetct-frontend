@@ -9,13 +9,7 @@ https://hit-and-blow-onchain.herokuapp.com
 
 
 This project does't work on Vercel because api/bot.ts does't work on serverless environment.  
-That's why deploy on Herok.### Frontend code for this project.    
-
-This project does't work on serverless environment(Vercel etc).  
-So it's deployed on Heroku. 
-
-
-
+That's why it's deployed on Herok.
  
 ___
 　　
