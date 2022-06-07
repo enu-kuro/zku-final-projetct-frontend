@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useChains } from "hooks/useChains";
 import { AvailableChains } from "utils";
 import { hooks as metaMaskHooks, metaMask } from "connectors/metaMask";
+import { Tutorial } from "./Tutorial";
 const { useAccount } = metaMaskHooks;
 
 export const Header = ({
@@ -23,6 +24,7 @@ export const Header = ({
   const router = useRouter();
   const { isMainnet, selectedChain } = useChains();
   const [isResetting, setIsResetting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const initialize = async () => {
     setIsResetting(true);
@@ -81,38 +83,50 @@ export const Header = ({
     );
   };
   return (
-    <div className="navbar bg-neutral text-neutral-content">
-      <div className="navbar-start"></div>
-      <div className="navbar-center">
-        <span className="font-bold text-4xl">{centerText}</span>
-      </div>
-      <div className="navbar-end mr-5">
-        {canChangeChain && (
-          <select
-            className="mr-5 select select-bordered select-sm w-42 max-w-xs"
-            onChange={handleOnChangeNetwork}
-            value={selectedChain?.name}
-          >
-            {AvailableChains.map((n, idx) => {
-              return (
-                <option key={idx} value={AvailableChains[idx].name}>
-                  {n.name}
-                </option>
-              );
-            })}
-          </select>
-        )}
-        <GithubLink className="" />
-        {account && (
+    <>
+      {showModal && <Tutorial setShowModal={setShowModal} />}
+      <div className="navbar bg-neutral text-neutral-content">
+        <div className="navbar-start">
           <Button
-            className="btn btn-error btn-xs ml-5"
-            onClick={initialize}
-            loading={isResetting}
+            className="btn btn-accent btn-sm ml-5"
+            onClick={() => {
+              setShowModal(true);
+            }}
           >
-            Reset
+            How to Play?
           </Button>
-        )}
+        </div>
+        <div className="navbar-center">
+          <span className="font-bold text-4xl">{centerText}</span>
+        </div>
+        <div className="navbar-end mr-5">
+          {canChangeChain && (
+            <select
+              className="mr-5 select select-bordered select-sm w-42 max-w-xs"
+              onChange={handleOnChangeNetwork}
+              value={selectedChain?.name}
+            >
+              {AvailableChains.map((n, idx) => {
+                return (
+                  <option key={idx} value={AvailableChains[idx].name}>
+                    {n.name}
+                  </option>
+                );
+              })}
+            </select>
+          )}
+          <GithubLink className="" />
+          {account && (
+            <Button
+              className="btn btn-error btn-xs ml-5"
+              onClick={initialize}
+              loading={isResetting}
+            >
+              Reset
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
